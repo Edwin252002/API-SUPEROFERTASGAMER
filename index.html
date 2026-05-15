@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamerPower Dashboard</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1> Game Hunter API</h1>
+        
+        <div class="controls">
+            <select id="qualitySelect">
+                <option value="normal">Calidad: Normal</option>
+                <option value="epico">Calidad: Epico</option>
+                <option value="legendario">Calidad: Legendario</option>
+            </select>
+            <button onclick="loadGames()">Buscar Regalos</button>
+        </div>
+
+        <div id="loader" class="hidden">Cuscando ofertas...</div>
+        <div id="gamesGrid" class="grid">
+        </div>
+    </div>
+
+    <script>
+        async function loadGames() {
+            const quality = document.getElementById('qualitySelect').value;
+            const grid = document.getElementById('gamesGrid');
+            const loader = document.getElementById('loader');
+            
+            grid.innerHTML = '';
+            loader.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/buscar-por-calidad?calidad=${quality}`);
+                const data = await response.json();
+                
+                loader.classList.add('hidden');
+                
+                data.juegos.forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = `card ${data.calidad_buscada.toLowerCase()}`;
+                    card.innerHTML = `
+                        <img src="${game.thumbnail}" alt="${game.title}">
+                        <h3>${game.title}</h3>
+                        <p class="worth">${game.worth}</p>
+                        <p class="platform">${game.platforms}</p>
+                        <a href="${game.open_giveaway_url}" target="_blank">Reclamar</a>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                loader.innerText = 'Error al cargar los datos.';
+            }
+        }
+    </script>
+</body>
+</html>
